@@ -50,7 +50,7 @@ Create a `.env.local` file:
 
 ```env
 # API Configuration
-NEXT_PUBLIC_API_URL=http://localhost:5001
+API_URL=http://localhost:5001
 
 # NextAuth
 NEXTAUTH_URL=http://localhost:3000
