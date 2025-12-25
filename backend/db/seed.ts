@@ -1,5 +1,21 @@
 import { PrismaClient, PromotionSlabType } from '@prisma/client';
-import { hashPassword } from '../src/lib/auth';
+import argon2 from 'argon2';
+
+
+const PASSWORD_HASH_CONFIG = {
+  MEMORY_COST: 65536, // 64 MB
+  TIME_COST: 3,
+  PARALLELISM: 4,
+} as const;
+
+async function hashPassword(password: string): Promise<string> {
+  return argon2.hash(password, {
+    type: argon2.argon2id,
+    memoryCost: PASSWORD_HASH_CONFIG.MEMORY_COST,
+    timeCost: PASSWORD_HASH_CONFIG.TIME_COST,
+    parallelism: PASSWORD_HASH_CONFIG.PARALLELISM,
+  });
+}
 
 const prisma = new PrismaClient();
 
@@ -8,7 +24,7 @@ async function main() {
 
   // Delete all existing data first (in correct order to respect foreign keys)
   console.log('🗑️  Deleting existing data...');
-  
+
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
   await prisma.promotionSlab.deleteMany();
@@ -16,7 +32,7 @@ async function main() {
   await prisma.product.deleteMany();
   await prisma.refreshToken.deleteMany();
   await prisma.user.deleteMany();
-  
+
   console.log('✅ All existing data deleted');
 
   // Create default user

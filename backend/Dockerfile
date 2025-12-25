@@ -30,14 +30,12 @@ RUN apt-get update && apt-get install -y openssl netcat-openbsd && rm -rf /var/l
 COPY package.json package-lock.json* ./
 
 # Install production dependencies + Prisma CLI + tsx (needed for migrations and seeding)
-RUN npm ci --only=production && npm install -g prisma@^5.19.1 tsx
+RUN npm ci --only=production && npm install -g prisma@^5.19.1 tsx argon2
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/db ./db
-# Copy entire src folder for seed file imports (seed needs hashPassword from src/lib/auth which has many dependencies)
-COPY --from=builder /app/src/lib/auth ./src/lib/auth
 
 # Generate Prisma Client for the production platform (important for correct binary targets)
 RUN npx prisma generate
