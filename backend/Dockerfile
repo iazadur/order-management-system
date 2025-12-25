@@ -34,11 +34,13 @@ RUN npm ci --only=production && npm install -g prisma@^5.19.1 tsx
 
 # Copy built application from builder
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/db ./db
 # Copy entire src folder for seed file imports (seed needs hashPassword from src/lib/auth which has many dependencies)
-COPY --from=builder /app/src ./src
+COPY --from=builder /app/src/lib/auth ./src/lib/auth
+
+# Generate Prisma Client for the production platform (important for correct binary targets)
+RUN npx prisma generate
 
 # Copy entrypoint script
 COPY entrypoint.sh ./
