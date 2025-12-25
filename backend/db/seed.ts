@@ -23,17 +23,26 @@ async function main() {
   console.log('🌱 Starting seed process...');
 
   // Delete all existing data first (in correct order to respect foreign keys)
+  // Use try-catch to handle case when tables don't exist yet
   console.log('🗑️  Deleting existing data...');
 
-  await prisma.orderItem.deleteMany();
-  await prisma.order.deleteMany();
-  await prisma.promotionSlab.deleteMany();
-  await prisma.promotion.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.refreshToken.deleteMany();
-  await prisma.user.deleteMany();
-
-  console.log('✅ All existing data deleted');
+  try {
+    await prisma.orderItem.deleteMany();
+    await prisma.order.deleteMany();
+    await prisma.promotionSlab.deleteMany();
+    await prisma.promotion.deleteMany();
+    await prisma.product.deleteMany();
+    await prisma.refreshToken.deleteMany();
+    await prisma.user.deleteMany();
+    console.log('✅ All existing data deleted');
+  } catch (error: any) {
+    // If tables don't exist, that's okay - we'll create them
+    if (error?.code === 'P2021' || error?.message?.includes('does not exist')) {
+      console.log('⚠️  Tables do not exist yet - skipping delete (this is normal for first run)');
+    } else {
+      throw error; // Re-throw if it's a different error
+    }
+  }
 
   // Create default user
   console.log('👤 Creating default user...');

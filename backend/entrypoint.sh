@@ -11,9 +11,22 @@ done
 echo "Database is ready!"
 
 echo "Running Prisma migrations..."
-# Use prisma migrate deploy for production (applies pending migrations)
-# This will apply all pending migrations. If no migrations exist, it will do nothing.
-npx prisma migrate deploy
+# Check if migrations directory exists and has content
+if [ -d "prisma/migrations" ] && [ "$(ls -A prisma/migrations 2>/dev/null | grep -v migration_lock.toml)" ]; then
+  echo "Found migrations, deploying..."
+  # Use prisma migrate deploy for production (applies pending migrations)
+  npx prisma migrate deploy || {
+    echo "⚠️  Migration deploy failed, trying db push as fallback..."
+    npx prisma db push --accept-data-loss || true
+  }
+else
+  echo "⚠️  No migrations found or empty, using db push for initial setup..."
+  # Use db push to create tables from schema (for initial setup)
+  npx prisma db push --accept-data-loss || {
+    echo "❌ Failed to push schema. Check database connection and permissions."
+    exit 1
+  }
+fi
 
 # Seed the database
 echo "Seeding database..."
@@ -21,9 +34,7 @@ echo "Seeding database..."
 if [ -f "db/seed.ts" ]; then
   echo "Found seed file at db/seed.ts"
   echo "Running seed script..."
-  # Run the seed file using tsx (installed globally in Dockerfile)
-  # The seed script deletes all data first, then creates fresh seed data
-  # Temporarily disable exit on error for seed (set +e)
+  # Run the seed file using tsx
   set +e
   tsx db/seed.ts
   SEED_EXIT_CODE=$?
@@ -33,7 +44,6 @@ if [ -f "db/seed.ts" ]; then
   else
     echo "❌ Seed script exited with code $SEED_EXIT_CODE"
     echo "⚠️  Check logs above for error details"
-    # Don't exit - allow app to start even if seed fails
   fi
 else
   echo "⚠️  Seed file not found at db/seed.ts"
