@@ -24,6 +24,7 @@ export class AuthService {
     metadata?: RequestMetadata
   ): Promise<AuthResponse> {
     // Check if user already exists
+    // TODO: maybe add email verification later
     const exists = await this.userRepository.existsByEmail(data.email);
 
     if (exists) {
@@ -79,6 +80,7 @@ export class AuthService {
     const isValidPassword = await verifyPassword(data.password, user.passwordHash);
 
     if (!isValidPassword) {
+      // console.log('Failed login for:', data.email); // removed for security
       logger.warn('Failed login attempt', { email: data.email.toLowerCase() });
       throw new Error('Invalid email or password');
     }

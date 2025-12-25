@@ -20,6 +20,7 @@ export function Cart() {
   // Calculate discounts using custom hook
   const { appliedPromotions, itemDiscounts, totalDiscount } =
     useCartDiscounts(items, promotions)
+  // console.log('Cart discounts:', totalDiscount); // debug
 
   // Calculate totals
   const subtotal = React.useMemo(() => {

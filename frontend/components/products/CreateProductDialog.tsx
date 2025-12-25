@@ -31,7 +31,7 @@ const createProductSchema = z.object({
     .string()
     .min(1, "Slug is required")
     .max(255, "Slug must be less than 255 characters")
-    .regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
+    .regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"), // TODO: auto-generate from name?
   sku: z
     .string()
     .min(1, "SKU is required")

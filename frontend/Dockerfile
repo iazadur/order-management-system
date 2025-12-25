@@ -35,7 +35,7 @@ ENV PATH="$NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH"
 COPY package.json package-lock.json ./
 
 # Install npm packages with caching
-RUN npm i --force or --legacy-peer-deps
+RUN npm i --legacy-peer-deps
 
 # Stage 3: Build the project
 FROM ubuntu:25.04 AS builder

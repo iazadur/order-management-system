@@ -38,6 +38,7 @@ export function createApp(): Express {
 
   // Request logging
   app.use((req, _res, next) => {
+    // console.log('Request:', req.method, req.path); // debug
     logger.info(`${req.method} ${req.path}`, {
       ip: req.ip,
       userAgent: req.get('user-agent'),

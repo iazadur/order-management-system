@@ -38,6 +38,7 @@ export function calculateProductDiscount(
   product: ProductWithWeight,
   quantity: number
 ): DiscountResult {
+  // Infer type if not set (backward compatibility)
   const promotionType = promotion.type || inferPromotionType(promotion);
 
   switch (promotionType) {
@@ -101,6 +102,7 @@ function calculateFixedDiscount(
   let fixedAmount = 0;
 
   // Check if fixed amount is stored in description (e.g., "FIXED:5")
+  // This is a workaround since we don't have a direct field
   if (promotion.description) {
     const match = promotion.description.match(/FIXED:(\d+(?:\.\d+)?)/i);
     if (match) {
@@ -151,9 +153,11 @@ function calculateWeightedDiscount(
 
   // Calculate total weight
   const totalWeight = product.weight * quantity;
+  // console.log('Total weight:', totalWeight); // debug
 
   // Find matching slab
   // Note: Schema mapping - weight field stores minWeight, minOrderValue stores maxWeight
+  // TODO: maybe refactor schema to be clearer
   const matchingSlab = promotion.slabs.find((slab) => {
     const minWeight = slab.weight;
     const maxWeight = slab.minOrderValue ? Number(slab.minOrderValue) : Infinity;

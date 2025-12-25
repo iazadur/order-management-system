@@ -14,7 +14,6 @@ export class ProductController {
   /**
    * GET /api/products
    * Get all products (public endpoint)
-   * Query param: includeDisabled (default: false)
    */
   getAll = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {

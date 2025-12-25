@@ -9,6 +9,7 @@ export interface AppliedPromotion {
 
 /**
  * Calculate discounts for cart items based on active promotions
+ * This matches the backend calculation logic
  */
 export function calculateCartDiscounts(
   items: CartItem[],
@@ -22,6 +23,7 @@ export function calculateCartDiscounts(
   const itemDiscounts = new Map<string, number>()
 
   // Calculate discount for each item
+  // TODO: optimize if needed for large carts
   for (const item of items) {
     let bestDiscount = 0
     let bestPromotion: Promotion | null = null

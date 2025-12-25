@@ -1,7 +1,7 @@
 {
-  "name": "auth-backend",
+  "name": "order-management",
   "version": "1.0.0",
-  "description": "Production-grade authentication backend with JWT and rotating refresh tokens",
+  "description": "Production-grade order management system with authentication, product management, promotions, and order processing.",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
@@ -15,11 +15,12 @@
     "generate:secrets": "node scripts/generate-secrets.js"
   },
   "keywords": [
+    "order-management",
     "authentication",
-    "jwt",
-    "refresh-tokens",
-    "express",
-    "typescript"
+    "product-management",
+    "promotion-management",
+    "order-management",
+    "analytics"
   ],
   "author": "",
   "license": "MIT",

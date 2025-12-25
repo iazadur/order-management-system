@@ -14,8 +14,10 @@ const prisma = new PrismaClient({
 });
 
 // Log queries in development
+// TODO: maybe disable in production for performance
 if (process.env.NODE_ENV !== 'production') {
   prisma.$on('query' as never, (e: any) => {
+    // console.log('DB Query:', e.query); // too verbose, using logger instead
     logger.debug('Query', { query: e.query, duration: `${e.duration}ms` });
   });
 }

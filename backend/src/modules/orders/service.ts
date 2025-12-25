@@ -59,7 +59,7 @@ export class OrderService {
   ): Promise<OrderResponse> {
     // 1. Validate products exist and are enabled
     const productIds = data.items.map((item) => item.productId);
-    const uniqueProductIds = [...new Set(productIds)];
+    const uniqueProductIds = [...new Set(productIds)]; // remove duplicates
 
     const products = await prisma.product.findMany({
       where: {
@@ -93,6 +93,7 @@ export class OrderService {
 
     // 2. Fetch active promotions
     const activePromotions = await this.promotionService.getActivePromotions();
+    // console.log('Active promotions:', activePromotions.length); // debug
 
     // 3. Calculate discounts for each item
     const itemBreakdowns: OrderItemBreakdown[] = [];
