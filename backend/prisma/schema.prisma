@@ -1,0 +1,181 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  isVerified   Boolean  @default(false) @map("is_verified")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  refreshTokens RefreshToken[]
+  orders        Order[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  tokenHash String   @map("token_hash")
+  device    String?
+  ip        String?
+  userAgent String?  @map("user_agent")
+  expiresAt DateTime @map("expires_at")
+  revoked   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  sku         String   @unique
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  weight      Int      @default(0) // Weight in grams
+  currency    String   @default("BDT")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  promotionSlabs PromotionSlab[]
+  orderItems     OrderItem[]
+
+  @@index([isActive])
+  @@index([slug])
+  @@index([sku])
+  @@map("products")
+}
+
+model Promotion {
+  id             String    @id @default(uuid())
+  name           String
+  code           String?   @unique
+  description    String?
+  startsAt       DateTime? @map("starts_at")
+  endsAt         DateTime? @map("ends_at")
+  isActive       Boolean   @default(true) @map("is_active")
+  isStackable    Boolean   @default(false) @map("is_stackable")
+  priority       Int       @default(0)
+  maxRedemptions Int?      @map("max_redemptions")
+  timesRedeemed  Int       @default(0) @map("times_redeemed")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  minOrderValue   Decimal? @map("min_order_value") @db.Decimal(10, 2)
+  customerSegment String?  @map("customer_segment")
+
+  slabs  PromotionSlab[]
+  orders Order[]
+
+  @@index([isActive, startsAt, endsAt])
+  @@index([code])
+  @@index([priority])
+  @@map("promotions")
+}
+
+model PromotionSlab {
+  id            String            @id @default(uuid())
+  promotionId   String            @map("promotion_id")
+  productId     String?           @map("product_id")
+  minQty        Int?              @map("min_qty")
+  minOrderValue Decimal?          @map("min_order_value") @db.Decimal(10, 2)
+  weight        Int               @default(0)
+  type          PromotionSlabType @default(PERCENTAGE_DISCOUNT)
+  value         Float
+  isActive      Boolean           @default(true) @map("is_active")
+  createdAt     DateTime          @default(now()) @map("created_at")
+  updatedAt     DateTime          @updatedAt @map("updated_at")
+
+  promotion Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+  product   Product?  @relation(fields: [productId], references: [id])
+
+  @@index([promotionId])
+  @@index([productId])
+  @@index([isActive])
+  @@map("promotion_slabs")
+}
+
+enum PromotionSlabType {
+  PERCENTAGE_DISCOUNT
+  FIXED_AMOUNT_DISCOUNT
+  FREE_ITEM
+  FREE_SHIPPING
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  userId      String      @map("user_id")
+  promotionId String?     @map("promotion_id")
+  status      OrderStatus @default(PENDING)
+  currency    String      @default("BDT")
+  subtotal    Decimal     @db.Decimal(10, 2)
+  discount    Decimal     @default(0) @db.Decimal(10, 2)
+  tax         Decimal     @default(0) @db.Decimal(10, 2)
+  total       Decimal     @db.Decimal(10, 2)
+  createdAt   DateTime    @default(now()) @map("created_at")
+  updatedAt   DateTime    @updatedAt @map("updated_at")
+  isActive    Boolean     @default(true) @map("is_active")
+
+  externalId String? @map("external_id")
+  notes      String?
+
+  user      User        @relation(fields: [userId], references: [id])
+  promotion Promotion?  @relation(fields: [promotionId], references: [id])
+  items     OrderItem[]
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([status])
+  @@index([promotionId])
+  @@index([isActive])
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PAID
+  FULFILLED
+  CANCELLED
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String   @map("order_id")
+  productId String   @map("product_id")
+  quantity  Int
+  unitPrice Decimal  @db.Decimal(10, 2)
+  discount  Decimal  @default(0) @db.Decimal(10, 2)
+  total     Decimal  @db.Decimal(10, 2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  productName String @map("product_name")
+  productSku  String @map("product_sku")
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}

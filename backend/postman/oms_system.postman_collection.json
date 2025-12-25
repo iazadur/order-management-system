@@ -1,0 +1,2197 @@
+{
+    "info": {
+        "_postman_id": "auth-backend-collection",
+        "name": "Order Management System API",
+        "description": "Complete Postman collection for the Order Management System API.\n\n## Features\n- JWT Access Tokens (15 minutes)\n- Rotating Refresh Tokens (7 days)\n- HttpOnly Cookies\n- Token Rotation\n- Rate Limiting\n- Product Management\n- Promotion Management\n- Order Management\n- Analytics & Dashboard Statistics\n\n## Setup\n1. Import this collection\n2. Create an environment with the following variables:\n   - `base_url`: http://localhost:5001 (or your server URL)\n   - `access_token`: (will be set automatically)\n   - `refresh_token`: (will be set automatically)\n   - `product_id`: (will be set automatically)\n   - `promotion_id`: (will be set automatically)\n   - `order_id`: (will be set automatically)\n3. Start with the Register or Login request\n4. Then use the Products, Promotions, Orders, or Analytics endpoints\n\n## Currency\nAll prices and amounts are stored directly in BDT (Bangladeshi Taka).",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Register",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data) {",
+                                    "        pm.environment.set('access_token', response.data.accessToken);",
+                                    "        pm.environment.set('refresh_token', response.data.refreshToken);",
+                                    "        pm.environment.set('user_id', response.data.user.id);",
+                                    "        console.log('✅ Registration successful!');",
+                                    "        console.log('Access Token saved to environment');",
+                                    "        console.log('Refresh Token saved to environment');",
+                                    "    }",
+                                    "}",
+                                    "",
+                                    "pm.test('Status code is 201', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains user data', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('user');",
+                                    "    pm.expect(jsonData.data.user).to.have.property('id');",
+                                    "    pm.expect(jsonData.data.user).to.have.property('email');",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains tokens', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('accessToken');",
+                                    "    pm.expect(jsonData.data).to.have.property('refreshToken');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePass123!\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Register a new user account.\n\n## Requirements\n- Email must be a valid email address\n- Password must meet the following criteria:\n  - Minimum 8 characters\n  - At least one uppercase letter\n  - At least one lowercase letter\n  - At least one number\n  - At least one special character\n\n## Rate Limiting\n- 5 attempts per 15 minutes\n\n## Response\n- **201 Created**: User registered successfully\n- **400 Bad Request**: Validation error\n- **409 Conflict**: User already exists\n- **429 Too Many Requests**: Rate limit exceeded\n\n## Auto-saves tokens to environment variables"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data) {",
+                                    "        pm.environment.set('access_token', response.data.accessToken);",
+                                    "        pm.environment.set('refresh_token', response.data.refreshToken);",
+                                    "        pm.environment.set('user_id', response.data.user.id);",
+                                    "        console.log('✅ Login successful!');",
+                                    "        console.log('Access Token saved to environment');",
+                                    "        console.log('Refresh Token saved to environment');",
+                                    "    }",
+                                    "}",
+                                    "",
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains user data', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('user');",
+                                    "    pm.expect(jsonData.data.user).to.have.property('id');",
+                                    "    pm.expect(jsonData.data.user).to.have.property('email');",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains tokens', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('accessToken');",
+                                    "    pm.expect(jsonData.data).to.have.property('refreshToken');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"SecurePass123!\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Authenticate a user with email and password.\n\n## Security\n- Invalid credentials return generic error message (doesn't reveal if user exists)\n- Failed attempts are logged\n- Rate limited to 5 attempts per 15 minutes\n\n## Response\n- **200 OK**: Login successful\n- **400 Bad Request**: Validation error\n- **401 Unauthorized**: Invalid credentials\n- **429 Too Many Requests**: Rate limit exceeded\n\n## Auto-saves tokens to environment variables\n\n## Note\nTokens are also set as HttpOnly cookies automatically by the server."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Refresh Token",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data) {",
+                                    "        pm.environment.set('access_token', response.data.accessToken);",
+                                    "        pm.environment.set('refresh_token', response.data.refreshToken);",
+                                    "        console.log('✅ Token refreshed successfully!');",
+                                    "        console.log('New tokens saved to environment');",
+                                    "        console.log('⚠️ Old refresh token has been revoked (token rotation)');",
+                                    "    }",
+                                    "}",
+                                    "",
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains new tokens', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('accessToken');",
+                                    "    pm.expect(jsonData.data).to.have.property('refreshToken');",
+                                    "});",
+                                    "",
+                                    "pm.test('New refresh token is different', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const oldRefreshToken = pm.environment.get('refresh_token');",
+                                    "    const newRefreshToken = jsonData.data.refreshToken;",
+                                    "    if (oldRefreshToken) {",
+                                    "        pm.expect(newRefreshToken).to.not.equal(oldRefreshToken);",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Use refresh token from environment if available",
+                                    "const refreshToken = pm.environment.get('refresh_token');",
+                                    "",
+                                    "if (!refreshToken) {",
+                                    "    console.warn('⚠️ No refresh token found in environment. Please login or register first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/refresh",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "refresh"
+                            ]
+                        },
+                        "description": "Refresh the access token using a refresh token.\n\n## Token Rotation\nThis endpoint implements **token rotation** for security:\n- Old refresh token is **revoked** immediately\n- New refresh token is **generated** and returned\n- Prevents token replay attacks\n\n## How it works\n1. Validates the provided refresh token\n2. Revokes the old refresh token\n3. Generates new access token (15 min)\n4. Generates new refresh token (7 days)\n5. Stores new refresh token in database\n\n## Response\n- **200 OK**: Tokens refreshed successfully\n- **401 Unauthorized**: Invalid or expired refresh token\n\n## Auto-updates tokens in environment variables\n\n## Note\nYou can also send the refresh token via cookie (HttpOnly). The server checks both cookie and body."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Current User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains user data', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('user');",
+                                    "    pm.expect(jsonData.data.user).to.have.property('id');",
+                                    "    pm.expect(jsonData.data.user).to.have.property('email');",
+                                    "    pm.expect(jsonData.data.user).to.have.property('isVerified');",
+                                    "    pm.expect(jsonData.data.user).to.have.property('createdAt');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login or register first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/me",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "me"
+                            ]
+                        },
+                        "description": "Get the current authenticated user's information.\n\n## Authentication\nRequires a valid access token.\n\nYou can provide the token in two ways:\n1. **Authorization Header**: `Bearer <access_token>` (recommended for API clients)\n2. **Cookie**: `accessToken` (automatically set by browser)\n\n## Response\n- **200 OK**: User data returned\n- **401 Unauthorized**: Invalid or missing token\n- **404 Not Found**: User not found\n\n## User Data\n- `id`: User UUID\n- `email`: User email address\n- `isVerified`: Email verification status\n- `createdAt`: Account creation timestamp"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    // Clear tokens from environment",
+                                    "    pm.environment.unset('access_token');",
+                                    "    pm.environment.unset('refresh_token');",
+                                    "    console.log('✅ Logged out successfully');",
+                                    "    console.log('Tokens cleared from environment');",
+                                    "}",
+                                    "",
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "const refreshToken = pm.environment.get('refresh_token');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. You may not be logged in.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "logout"
+                            ]
+                        },
+                        "description": "Logout the current user and revoke the refresh token.\n\n## Authentication\nRequires a valid access token.\n\n## What it does\n1. Validates the access token\n2. Revokes the refresh token (if provided)\n3. Clears authentication cookies\n\n## Response\n- **200 OK**: Logged out successfully\n- **401 Unauthorized**: Invalid or missing token\n\n## Note\nThis only logs out the current session. Use \"Logout All\" to revoke all sessions."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout All Devices",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    // Clear tokens from environment",
+                                    "    pm.environment.unset('access_token');",
+                                    "    pm.environment.unset('refresh_token');",
+                                    "    console.log('✅ Logged out from all devices');",
+                                    "    console.log('All refresh tokens revoked');",
+                                    "    console.log('Tokens cleared from environment');",
+                                    "}",
+                                    "",
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. You may not be logged in.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/auth/logout-all",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "logout-all"
+                            ]
+                        },
+                        "description": "Logout from all devices and revoke all refresh tokens.\n\n## Authentication\nRequires a valid access token.\n\n## What it does\n1. Validates the access token\n2. Revokes **ALL** refresh tokens for the user\n3. Clears authentication cookies\n\n## Use Cases\n- User suspects account compromise\n- User wants to force logout from all devices\n- Security measure after password change\n\n## Response\n- **200 OK**: Logged out from all devices\n- **401 Unauthorized**: Invalid or missing token\n\n## Warning\nThis will invalidate all active sessions. User will need to login again on all devices."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Authentication endpoints for user registration, login, token management, and logout."
+        },
+        {
+            "name": "Products",
+            "item": [
+                {
+                    "name": "Get All Products",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains data array', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.be.an('array');",
+                                    "});",
+                                    "",
+                                    "if (pm.response.json().data.length > 0) {",
+                                    "    const product = pm.response.json().data[0];",
+                                    "    pm.environment.set('product_id', product.id);",
+                                    "    console.log('✅ Product ID saved to environment:', product.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/products?includeDisabled=false",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "products"
+                            ],
+                            "query": [
+                                {
+                                    "key": "includeDisabled",
+                                    "value": "false",
+                                    "description": "Set to 'true' to include disabled products"
+                                }
+                            ]
+                        },
+                        "description": "Get all products.\n\n## Public Endpoint\nNo authentication required.\n\n## Query Parameters\n- `includeDisabled` (optional): Set to `true` to include disabled products. Default: `false`\n\n## Response\n- **200 OK**: Returns array of products\n  - Only enabled products returned by default\n  - All products returned when `includeDisabled=true`\n\n## Product Fields\n- `id`: Product UUID\n- `name`: Product name\n- `slug`: URL-friendly identifier\n- `sku`: Stock keeping unit\n- `description`: Product description (nullable)\n- `price`: Price in BDT\n- `currency`: Currency code (default: BDT)\n- `isActive`: Enabled/disabled status\n- `createdAt`: Creation timestamp\n- `updatedAt`: Last update timestamp"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Product by ID",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains product data', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('id');",
+                                    "    pm.expect(jsonData.data).to.have.property('name');",
+                                    "    pm.expect(jsonData.data).to.have.property('price');",
+                                    "    pm.expect(jsonData.data).to.have.property('isActive');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "// Use product_id from environment if available",
+                                    "const productId = pm.environment.get('product_id');",
+                                    "",
+                                    "if (!productId) {",
+                                    "    console.warn('⚠️ No product_id found in environment. Please run \"Get All Products\" first or set it manually.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/products/{{product_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "products",
+                                "{{product_id}}"
+                            ]
+                        },
+                        "description": "Get a single product by ID.\n\n## Public Endpoint\nNo authentication required.\n\n## Path Parameters\n- `id`: Product UUID\n\n## Response\n- **200 OK**: Product data returned\n- **404 Not Found**: Product not found\n- **400 Bad Request**: Invalid UUID format"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Product",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data) {",
+                                    "        pm.environment.set('product_id', response.data.id);",
+                                    "        console.log('✅ Product created successfully!');",
+                                    "        console.log('Product ID saved to environment:', response.data.id);",
+                                    "    }",
+                                    "}",
+                                    "",
+                                    "pm.test('Status code is 201', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains product data', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('id');",
+                                    "    pm.expect(jsonData.data).to.have.property('name');",
+                                    "    pm.expect(jsonData.data).to.have.property('slug');",
+                                    "    pm.expect(jsonData.data).to.have.property('sku');",
+                                    "    pm.expect(jsonData.data).to.have.property('price');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"New Product\",\n  \"slug\": \"new-product\",\n  \"sku\": \"PROD-001\",\n  \"description\": \"Product description\",\n  \"price\": 29.99,\n  \"currency\": \"BDT\",\n  \"isActive\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/products",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "products"
+                            ]
+                        },
+                        "description": "Create a new product.\n\n## Authentication Required\nRequires a valid access token.\n\n## Required Fields\n- `name`: Product name (1-255 characters)\n- `slug`: URL-friendly identifier (lowercase, numbers, hyphens only)\n- `sku`: Stock keeping unit (1-100 characters)\n- `price`: Price in BDT (positive integer)\n\n## Optional Fields\n- `description`: Product description (max 2000 characters)\n- `currency`: Currency code (3 letters, default: BDT)\n- `isActive`: Enabled status (default: true)\n\n## Validation\n- Slug must be unique\n- SKU must be unique\n- Price must be positive integer\n\n## Response\n- **201 Created**: Product created successfully\n- **400 Bad Request**: Validation error\n- **401 Unauthorized**: Authentication required\n- **409 Conflict**: Slug or SKU already exists\n\n## Auto-saves product ID to environment variable"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Product",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains updated product data', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('id');",
+                                    "    pm.expect(jsonData.data).to.have.property('updatedAt');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "const productId = pm.environment.get('product_id');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}",
+                                    "",
+                                    "if (!productId) {",
+                                    "    console.warn('⚠️ No product_id found. Please run \"Get All Products\" or \"Create Product\" first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Updated Product Name\",\n  \"price\": 39.99,\n  \"description\": \"Updated description\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/products/{{product_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "products",
+                                "{{product_id}}"
+                            ]
+                        },
+                        "description": "Update a product.\n\n## Authentication Required\nRequires a valid access token.\n\n## Path Parameters\n- `id`: Product UUID\n\n## Request Body\nAll fields are optional, but at least one field must be provided:\n- `name`: Product name (1-255 characters)\n- `slug`: URL-friendly identifier (must be unique)\n- `sku`: Stock keeping unit (must be unique)\n- `description`: Product description (max 2000 characters)\n- `price`: Price in BDT (positive integer)\n- `currency`: Currency code (3 letters)\n- `isActive`: Enabled status\n\n## Validation\n- Slug must be unique (if changed)\n- SKU must be unique (if changed)\n- Price must be positive integer (if provided)\n\n## Response\n- **200 OK**: Product updated successfully\n- **400 Bad Request**: Validation error\n- **401 Unauthorized**: Authentication required\n- **404 Not Found**: Product not found\n- **409 Conflict**: Slug or SKU already exists"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Toggle Product Status",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Product status is updated', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const requestBody = JSON.parse(pm.request.body.raw);",
+                                    "    pm.expect(jsonData.data.isActive).to.equal(requestBody.isEnabled);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "const productId = pm.environment.get('product_id');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}",
+                                    "",
+                                    "if (!productId) {",
+                                    "    console.warn('⚠️ No product_id found. Please run \"Get All Products\" or \"Create Product\" first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"isEnabled\": false\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/products/{{product_id}}/toggle",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "products",
+                                "{{product_id}}",
+                                "toggle"
+                            ]
+                        },
+                        "description": "Toggle product enabled/disabled status.\n\n## Authentication Required\nRequires a valid access token.\n\n## Path Parameters\n- `id`: Product UUID\n\n## Request Body\n- `isEnabled`: Boolean - Set to `true` to enable, `false` to disable\n\n## Behavior\n- Disabled products are hidden from public product listings\n- Disabled products can still be accessed by ID\n- Use this to temporarily hide products without deleting them\n\n## Response\n- **200 OK**: Product status toggled successfully\n  - Returns updated product with new `isActive` status\n- **400 Bad Request**: Invalid UUID or missing `isEnabled` field\n- **401 Unauthorized**: Authentication required\n- **404 Not Found**: Product not found\n\n## Use Cases\n- Temporarily disable out-of-stock products\n- Hide products during maintenance\n- Enable/disable products for seasonal sales"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Product management endpoints for CRUD operations.\n\n## Public Endpoints\n- Get All Products\n- Get Product by ID\n\n## Protected Endpoints (Auth Required)\n- Create Product\n- Update Product\n- Toggle Product Status\n\n## Features\n- Product filtering (includeDisabled parameter)\n- Slug and SKU uniqueness validation\n- Price in BDT (decimal precision)\n- Soft delete via enable/disable toggle"
+        },
+        {
+            "name": "Promotions",
+            "item": [
+                {
+                    "name": "Get Active Promotions",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains data array', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.be.an('array');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/promotions/active",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "promotions",
+                                "active"
+                            ]
+                        },
+                        "description": "Get all active promotions (enabled and within date range).\n\n## Public Endpoint\nNo authentication required.\n\n## Response\n- **200 OK**: Returns array of active promotions\n  - Only enabled promotions\n  - Only promotions within their date range (if dates are set)\n\n## Promotion Fields\n- `id`: Promotion UUID\n- `name`: Promotion title\n- `description`: Promotion description (contains type info)\n- `startsAt`: Start date (nullable)\n- `endsAt`: End date (nullable)\n- `isActive`: Enabled/disabled status\n- `slabs`: Array of promotion slabs (for weighted promotions)\n- `createdAt`: Creation timestamp\n- `updatedAt`: Last update timestamp"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Promotions",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains data array', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.be.an('array');",
+                                    "});",
+                                    "",
+                                    "if (pm.response.json().data.length > 0) {",
+                                    "    const promotion = pm.response.json().data[0];",
+                                    "    pm.environment.set('promotion_id', promotion.id);",
+                                    "    console.log('✅ Promotion ID saved to environment:', promotion.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/promotions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "promotions"
+                            ]
+                        },
+                        "description": "Get all promotions (including disabled and expired).\n\n## Authentication Required\nRequires a valid access token.\n\n## Response\n- **200 OK**: Returns array of all promotions\n  - Includes disabled promotions\n  - Includes expired promotions\n  - Includes all promotion types (PERCENTAGE, FIXED, WEIGHTED)\n\n## Auto-saves first promotion ID to environment variable"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Promotion by ID",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains promotion data', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('id');",
+                                    "    pm.expect(jsonData.data).to.have.property('name');",
+                                    "    pm.expect(jsonData.data).to.have.property('isActive');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "const promotionId = pm.environment.get('promotion_id');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}",
+                                    "",
+                                    "if (!promotionId) {",
+                                    "    console.warn('⚠️ No promotion_id found. Please run \"Get All Promotions\" or \"Create Promotion\" first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/promotions/{{promotion_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "promotions",
+                                "{{promotion_id}}"
+                            ]
+                        },
+                        "description": "Get a single promotion by ID.\n\n## Authentication Required\nRequires a valid access token.\n\n## Path Parameters\n- `id`: Promotion UUID\n\n## Response\n- **200 OK**: Promotion data returned\n- **404 Not Found**: Promotion not found\n- **400 Bad Request**: Invalid UUID format"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Promotion - PERCENTAGE",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data) {",
+                                    "        pm.environment.set('promotion_id', response.data.id);",
+                                    "        console.log('✅ Promotion created successfully!');",
+                                    "        console.log('Promotion ID saved to environment:', response.data.id);",
+                                    "    }",
+                                    "}",
+                                    "",
+                                    "pm.test('Status code is 201', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains promotion data', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('id');",
+                                    "    pm.expect(jsonData.data).to.have.property('name');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"10% Off Sale\",\n  \"type\": \"PERCENTAGE\",\n  \"percentageValue\": 10,\n  \"startDate\": \"2024-01-01T00:00:00.000Z\",\n  \"endDate\": \"2024-12-31T23:59:59.000Z\",\n  \"isEnabled\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/promotions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "promotions"
+                            ]
+                        },
+                        "description": "Create a percentage-based promotion.\n\n## Authentication Required\nRequires a valid access token.\n\n## Required Fields\n- `title`: Promotion title (1-255 characters)\n- `type`: Must be \"PERCENTAGE\"\n- `percentageValue`: Percentage discount (positive number)\n\n## Optional Fields\n- `startDate`: Start date (ISO 8601 datetime string)\n- `endDate`: End date (ISO 8601 datetime string)\n- `isEnabled`: Enabled status (default: true)\n\n## Validation\n- Start date must be before end date\n- Percentage value must be positive\n- Cannot have slabs for PERCENTAGE type\n\n## Response\n- **201 Created**: Promotion created successfully\n- **400 Bad Request**: Validation error\n- **401 Unauthorized**: Authentication required\n\n## Auto-saves promotion ID to environment variable"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Promotion - FIXED",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data) {",
+                                    "        pm.environment.set('promotion_id', response.data.id);",
+                                    "        console.log('✅ Promotion created successfully!');",
+                                    "        console.log('Promotion ID saved to environment:', response.data.id);",
+                                    "    }",
+                                    "}",
+                                    "",
+                                    "pm.test('Status code is 201', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"৳5 Off Sale\",\n  \"type\": \"FIXED\",\n  \"fixedValue\": 5.00,\n  \"startDate\": \"2024-01-01T00:00:00.000Z\",\n  \"endDate\": \"2024-12-31T23:59:59.000Z\",\n  \"isEnabled\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/promotions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "promotions"
+                            ]
+                        },
+                        "description": "Create a fixed amount promotion.\n\n## Authentication Required\nRequires a valid access token.\n\n## Required Fields\n- `title`: Promotion title (1-255 characters)\n- `type`: Must be \"FIXED\"\n- `fixedValue`: Fixed discount amount (positive number)\n\n## Optional Fields\n- `startDate`: Start date (ISO 8601 datetime string)\n- `endDate`: End date (ISO 8601 datetime string)\n- `isEnabled`: Enabled status (default: true)\n\n## Validation\n- Start date must be before end date\n- Fixed value must be positive\n- Cannot have slabs for FIXED type\n\n## Response\n- **201 Created**: Promotion created successfully\n- **400 Bad Request**: Validation error\n- **401 Unauthorized**: Authentication required"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Promotion - WEIGHTED",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data) {",
+                                    "        pm.environment.set('promotion_id', response.data.id);",
+                                    "        console.log('✅ Promotion created successfully!');",
+                                    "        console.log('Promotion ID saved to environment:', response.data.id);",
+                                    "    }",
+                                    "}",
+                                    "",
+                                    "pm.test('Status code is 201', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains slabs', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('slabs');",
+                                    "    pm.expect(jsonData.data.slabs).to.be.an('array');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Weight-Based Discount\",\n  \"type\": \"WEIGHTED\",\n  \"slabs\": [\n    {\n      \"minWeight\": 0,\n      \"maxWeight\": 100,\n      \"discountPerUnit\": 0.10\n    },\n    {\n      \"minWeight\": 100,\n      \"maxWeight\": 500,\n      \"discountPerUnit\": 0.20\n    },\n    {\n      \"minWeight\": 500,\n      \"maxWeight\": 1000,\n      \"discountPerUnit\": 0.30\n    }\n  ],\n  \"startDate\": \"2024-01-01T00:00:00.000Z\",\n  \"endDate\": \"2024-12-31T23:59:59.000Z\",\n  \"isEnabled\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/promotions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "promotions"
+                            ]
+                        },
+                        "description": "Create a weight-based promotion with slabs.\n\n## Authentication Required\nRequires a valid access token.\n\n## Required Fields\n- `title`: Promotion title (1-255 characters)\n- `type`: Must be \"WEIGHTED\"\n- `slabs`: Array of slab objects (at least one required)\n\n## Slab Fields\n- `minWeight`: Minimum weight in grams (non-negative integer)\n- `maxWeight`: Maximum weight in grams (positive integer)\n- `discountPerUnit`: Discount per unit (positive number)\n\n## Optional Fields\n- `startDate`: Start date (ISO 8601 datetime string)\n- `endDate`: End date (ISO 8601 datetime string)\n- `isEnabled`: Enabled status (default: true)\n\n## Validation\n- Start date must be before end date\n- Slabs are required for WEIGHTED type\n- Min weight must be less than max weight\n- Slab ranges cannot overlap\n- All slab fields are required\n\n## Response\n- **201 Created**: Promotion created successfully\n- **400 Bad Request**: Validation error (overlapping slabs, invalid ranges)\n- **401 Unauthorized**: Authentication required"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Promotion",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains updated promotion data', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('id');",
+                                    "    pm.expect(jsonData.data).to.have.property('updatedAt');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "const promotionId = pm.environment.get('promotion_id');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}",
+                                    "",
+                                    "if (!promotionId) {",
+                                    "    console.warn('⚠️ No promotion_id found. Please run \"Get All Promotions\" or \"Create Promotion\" first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Updated Promotion Title\",\n  \"startDate\": \"2024-02-01T00:00:00.000Z\",\n  \"endDate\": \"2024-11-30T23:59:59.000Z\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/promotions/{{promotion_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "promotions",
+                                "{{promotion_id}}"
+                            ]
+                        },
+                        "description": "Update promotion (limited fields only).\n\n## Authentication Required\nRequires a valid access token.\n\n## Path Parameters\n- `id`: Promotion UUID\n\n## Updatable Fields\n- `title`: Promotion title (1-255 characters)\n- `startDate`: Start date (ISO 8601 datetime string, nullable)\n- `endDate`: End date (ISO 8601 datetime string, nullable)\n\n## Restrictions\n- **Type cannot be changed** after creation\n- **Slabs cannot be modified** after creation\n- Only title and dates can be updated\n\n## Validation\n- Start date must be before end date\n- At least one field must be provided\n\n## Response\n- **200 OK**: Promotion updated successfully\n- **400 Bad Request**: Validation error or invalid UUID\n- **401 Unauthorized**: Authentication required\n- **404 Not Found**: Promotion not found"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Toggle Promotion",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains updated promotion with new status', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('id');",
+                                    "    pm.expect(jsonData.data).to.have.property('isActive');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "const promotionId = pm.environment.get('promotion_id');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}",
+                                    "",
+                                    "if (!promotionId) {",
+                                    "    console.warn('⚠️ No promotion_id found. Please run \"Get All Promotions\" or \"Create Promotion\" first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"isEnabled\": false\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/promotions/{{promotion_id}}/toggle",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "promotions",
+                                "{{promotion_id}}",
+                                "toggle"
+                            ]
+                        },
+                        "description": "Toggle promotion enabled/disabled status.\n\n## Authentication Required\nRequires a valid access token.\n\n## Path Parameters\n- `id`: Promotion UUID\n\n## Request Body\n- `isEnabled`: Boolean - Set to `true` to enable, `false` to disable\n\n## Behavior\n- Disabled promotions are excluded from active promotions list\n- Disabled promotions can still be accessed by ID\n- Use this to temporarily disable promotions without deleting them\n\n## Response\n- **200 OK**: Promotion status toggled successfully\n  - Returns updated promotion with new `isActive` status\n- **400 Bad Request**: Invalid UUID or missing `isEnabled` field\n- **401 Unauthorized**: Authentication required\n- **404 Not Found**: Promotion not found\n\n## Use Cases\n- Temporarily disable promotions\n- Enable/disable promotions for testing\n- Control promotion availability"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Promotion management endpoints for CRUD operations.\n\n## Public Endpoints\n- Get Active Promotions\n\n## Protected Endpoints (Auth Required)\n- Get All Promotions\n- Get Promotion by ID\n- Create Promotion (PERCENTAGE, FIXED, WEIGHTED)\n- Update Promotion (limited fields)\n- Toggle Promotion Status\n\n## Promotion Types\n- **PERCENTAGE**: Percentage-based discount (requires percentageValue)\n- **FIXED**: Fixed amount discount (requires fixedValue)\n- **WEIGHTED**: Weight-based discount with slabs (requires slabs array)\n\n## Features\n- Date range validation\n- Slab validation for weighted promotions\n- Limited update (only title and dates)\n- Type and slabs cannot be modified after creation\n- Soft delete via enable/disable toggle"
+        },
+        {
+            "name": "Health Check",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains timestamp', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('timestamp');",
+                                    "});",
+                                    "",
+                                    "pm.test('Response time is less than 200ms', function () {",
+                                    "    pm.expect(pm.response.responseTime).to.be.below(200);",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/health",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        },
+                        "description": "Check if the server is running and healthy.\n\n## Purpose\n- Health check endpoint for monitoring\n- Load balancer health checks\n- CI/CD pipeline checks\n\n## Response\n- **200 OK**: Server is healthy\n  - `success`: true\n  - `message`: \"Server is healthy\"\n  - `timestamp`: ISO 8601 timestamp\n\n## No Authentication Required\nThis endpoint is public and does not require authentication."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Health check endpoint for server monitoring."
+        },
+        {
+            "name": "Orders",
+            "item": [
+                {
+                    "name": "Create Order",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const response = pm.response.json();",
+                                    "    if (response.success && response.data) {",
+                                    "        pm.environment.set('order_id', response.data.id);",
+                                    "        console.log('✅ Order created successfully!');",
+                                    "        console.log('Order ID saved to environment:', response.data.id);",
+                                    "    }",
+                                    "}",
+                                    "",
+                                    "pm.test('Status code is 201', function () {",
+                                    "    pm.response.to.have.status(201);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains order data', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('id');",
+                                    "    pm.expect(jsonData.data).to.have.property('customerInfo');",
+                                    "    pm.expect(jsonData.data).to.have.property('items');",
+                                    "    pm.expect(jsonData.data).to.have.property('grandTotal');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "const productId = pm.environment.get('product_id');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}",
+                                    "",
+                                    "if (!productId) {",
+                                    "    console.warn('⚠️ No product_id found. Please run \"Get All Products\" or \"Create Product\" first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"items\": [\n    {\n      \"productId\": \"{{product_id}}\",\n      \"quantity\": 2\n    }\n  ],\n  \"customerInfo\": {\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@example.com\",\n    \"phone\": \"+1234567890\",\n    \"address\": \"123 Main St, City, Country\"\n  },\n  \"promotionId\": null\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/orders",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "orders"
+                            ]
+                        },
+                        "description": "Create a new order.\n\n## Authentication Required\nRequires a valid access token.\n\n## Required Fields\n- `items`: Array of order items (at least one required, max 50)\n  - `productId`: Product UUID\n  - `quantity`: Positive integer (1-1000)\n- `customerInfo`: Customer information object\n  - `name`: Customer name (1-255 characters)\n  - `email`: Valid email address (max 255 characters)\n  - `phone`: Phone number (optional, max 20 characters)\n  - `address`: Address (optional, max 500 characters)\n\n## Optional Fields\n- `promotionId`: Promotion UUID (nullable)\n\n## Validation\n- All products must exist and be active\n- No duplicate products in items\n- Quantity must be positive integer\n- Email must be valid format\n\n## Response\n- **201 Created**: Order created successfully\n  - Returns order with calculated discounts, subtotal, and grand total\n- **400 Bad Request**: Validation error or product not found\n- **401 Unauthorized**: Authentication required\n\n## Auto-saves order ID to environment variable\n\n## Note\nOrder automatically calculates:\n- Item-level discounts from promotions\n- Subtotal (sum of all items)\n- Total discount (sum of all item discounts)\n- Grand total (subtotal - total discount)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get My Orders",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains data array', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.be.an('array');",
+                                    "});",
+                                    "",
+                                    "if (pm.response.json().data.length > 0) {",
+                                    "    const order = pm.response.json().data[0];",
+                                    "    pm.environment.set('order_id', order.id);",
+                                    "    console.log('✅ Order ID saved to environment:', order.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/orders/my",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "orders",
+                                "my"
+                            ]
+                        },
+                        "description": "Get all orders for the authenticated user.\n\n## Authentication Required\nRequires a valid access token.\n\n## Response\n- **200 OK**: Returns array of user's orders\n  - Only orders belonging to the authenticated user\n  - Includes order items, customer info, and promotion details\n  - Sorted by creation date (newest first)\n\n## Order Fields\n- `id`: Order UUID\n- `customerInfo`: Customer information object\n- `items`: Array of order items with product details\n- `subtotal`: Subtotal in BDT\n- `totalDiscount`: Total discount in BDT\n- `grandTotal`: Grand total in BDT\n- `createdAt`: Order creation timestamp\n- `promotion`: Applied promotion (if any)\n\n## Auto-saves first order ID to environment variable"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get All Orders",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains data array', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.be.an('array');",
+                                    "});",
+                                    "",
+                                    "if (pm.response.json().data.length > 0) {",
+                                    "    const order = pm.response.json().data[0];",
+                                    "    pm.environment.set('order_id', order.id);",
+                                    "    console.log('✅ Order ID saved to environment:', order.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/orders?page=1&limit=10&sortBy=createdAt&sortOrder=desc",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "orders"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1",
+                                    "description": "Page number (default: 1)"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10",
+                                    "description": "Items per page (default: 10, max: 100)"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "createdAt",
+                                    "description": "Sort field: 'createdAt' or 'total' (default: 'createdAt')"
+                                },
+                                {
+                                    "key": "sortOrder",
+                                    "value": "desc",
+                                    "description": "Sort order: 'asc' or 'desc' (default: 'desc')"
+                                },
+                                {
+                                    "key": "status",
+                                    "value": "",
+                                    "description": "Filter by status: 'PENDING', 'CONFIRMED', 'PAID', 'FULFILLED', 'CANCELLED' (optional)",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "description": "Get all orders (admin only).\n\n## Authentication Required\nRequires a valid access token.\n\n## Query Parameters\n- `page`: Page number (default: 1)\n- `limit`: Items per page (default: 10, max: 100)\n- `sortBy`: Sort field - 'createdAt' or 'total' (default: 'createdAt')\n- `sortOrder`: Sort order - 'asc' or 'desc' (default: 'desc')\n- `status`: Filter by order status (optional)\n  - Values: 'PENDING', 'CONFIRMED', 'PAID', 'FULFILLED', 'CANCELLED'\n\n## Response\n- **200 OK**: Returns paginated array of orders\n  - Includes all orders from all users\n  - Includes order items, customer info, and promotion details\n  - Sorted by specified field and order\n\n## Auto-saves first order ID to environment variable\n\n## Note\nThis endpoint is intended for admin use. Currently, all authenticated users can access it."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Order by ID",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains order data', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('id');",
+                                    "    pm.expect(jsonData.data).to.have.property('customerInfo');",
+                                    "    pm.expect(jsonData.data).to.have.property('items');",
+                                    "    pm.expect(jsonData.data).to.have.property('grandTotal');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "const orderId = pm.environment.get('order_id');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}",
+                                    "",
+                                    "if (!orderId) {",
+                                    "    console.warn('⚠️ No order_id found. Please run \"Create Order\" or \"Get My Orders\" first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/orders/{{order_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "orders",
+                                "{{order_id}}"
+                            ]
+                        },
+                        "description": "Get a single order by ID.\n\n## Authentication Required\nRequires a valid access token.\n\n## Path Parameters\n- `id`: Order UUID\n\n## Access Control\n- Users can only access their own orders\n- Returns 404 if order doesn't exist or doesn't belong to user\n\n## Response\n- **200 OK**: Order data returned\n  - Includes order items with product details\n  - Includes customer information\n  - Includes applied promotion (if any)\n  - Includes calculated totals\n- **400 Bad Request**: Invalid UUID format\n- **401 Unauthorized**: Authentication required\n- **404 Not Found**: Order not found or access denied"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Order Statistics",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains statistics', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('totalOrders');",
+                                    "    pm.expect(jsonData.data).to.have.property('totalRevenue');",
+                                    "    pm.expect(jsonData.data).to.have.property('averageOrderValue');",
+                                    "    pm.expect(jsonData.data).to.have.property('todaysOrders');",
+                                    "    pm.expect(jsonData.data).to.have.property('todaysRevenue');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/orders/stats",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "orders",
+                                "stats"
+                            ]
+                        },
+                        "description": "Get order statistics (admin only).\n\n## Authentication Required\nRequires a valid access token.\n\n## Response\n- **200 OK**: Returns order statistics\n  - `totalOrders`: Total number of orders (all time)\n  - `totalRevenue`: Total revenue in BDT (all time)\n  - `averageOrderValue`: Average order value in BDT\n  - `todaysOrders`: Number of orders created today\n  - `todaysRevenue`: Revenue from today's orders in BDT\n\n## Statistics Calculation\n- All statistics are calculated from all orders in the system\n- Today's statistics use orders created on the current date (UTC)\n- Revenue values are in BDT\n\n## Note\nThis endpoint is intended for admin use. Currently, all authenticated users can access it."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Order management endpoints for creating and retrieving orders.\n\n## Protected Endpoints (Auth Required)\n- Create Order\n- Get My Orders\n- Get All Orders (admin)\n- Get Order by ID\n- Get Order Statistics (admin)\n\n## Features\n- Automatic discount calculation from promotions\n- Item-level and order-level discount support\n- Customer information storage\n- Order status tracking\n- Pagination and sorting for order lists\n- Comprehensive order statistics"
+        },
+        {
+            "name": "Analytics",
+            "item": [
+                {
+                    "name": "Get Dashboard Statistics",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test('Status code is 200', function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "",
+                                    "pm.test('Response has success field', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData).to.have.property('success');",
+                                    "    pm.expect(jsonData.success).to.be.true;",
+                                    "});",
+                                    "",
+                                    "pm.test('Response contains analytics data', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.expect(jsonData.data).to.have.property('orders');",
+                                    "    pm.expect(jsonData.data).to.have.property('products');",
+                                    "    pm.expect(jsonData.data).to.have.property('promotions');",
+                                    "    pm.expect(jsonData.data).to.have.property('revenue');",
+                                    "});",
+                                    "",
+                                    "pm.test('Orders statistics are present', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const orders = jsonData.data.orders;",
+                                    "    pm.expect(orders).to.have.property('total');",
+                                    "    pm.expect(orders).to.have.property('today');",
+                                    "    pm.expect(orders).to.have.property('thisWeek');",
+                                    "    pm.expect(orders).to.have.property('thisMonth');",
+                                    "    pm.expect(orders).to.have.property('totalRevenue');",
+                                    "});",
+                                    "",
+                                    "pm.test('Products statistics are present', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const products = jsonData.data.products;",
+                                    "    pm.expect(products).to.have.property('total');",
+                                    "    pm.expect(products).to.have.property('active');",
+                                    "    pm.expect(products).to.have.property('inactive');",
+                                    "});",
+                                    "",
+                                    "pm.test('Promotions statistics are present', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const promotions = jsonData.data.promotions;",
+                                    "    pm.expect(promotions).to.have.property('total');",
+                                    "    pm.expect(promotions).to.have.property('active');",
+                                    "    pm.expect(promotions).to.have.property('inactive');",
+                                    "});",
+                                    "",
+                                    "pm.test('Revenue statistics are present', function () {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    const revenue = jsonData.data.revenue;",
+                                    "    pm.expect(revenue).to.have.property('today');",
+                                    "    pm.expect(revenue).to.have.property('thisWeek');",
+                                    "    pm.expect(revenue).to.have.property('thisMonth');",
+                                    "    pm.expect(revenue).to.have.property('allTime');",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "exec": [
+                                    "const accessToken = pm.environment.get('access_token');",
+                                    "",
+                                    "if (!accessToken) {",
+                                    "    console.warn('⚠️ No access token found. Please login first.');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{access_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/analytics/dashboard",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "analytics",
+                                "dashboard"
+                            ]
+                        },
+                        "description": "Get comprehensive dashboard statistics.\n\n## Authentication Required\nRequires a valid access token.\n\n## Response\n- **200 OK**: Returns comprehensive dashboard statistics\n\n## Statistics Structure\n### Orders\n- `total`: Total number of orders (all time)\n- `today`: Number of orders created today\n- `thisWeek`: Number of orders created in last 7 days\n- `thisMonth`: Number of orders created in last 30 days\n- `totalRevenue`: Total revenue in BDT (all time)\n- `todayRevenue`: Revenue from today's orders in BDT\n- `thisWeekRevenue`: Revenue from last 7 days in BDT\n- `thisMonthRevenue`: Revenue from last 30 days in BDT\n- `averageOrderValue`: Average order value in BDT\n\n### Products\n- `total`: Total number of products\n- `active`: Number of active products\n- `inactive`: Number of inactive products\n\n### Promotions\n- `total`: Total number of promotions\n- `active`: Number of active promotions (enabled and within date range)\n- `inactive`: Number of inactive promotions\n\n### Revenue\n- `today`: Revenue from today's orders in BDT\n- `thisWeek`: Revenue from last 7 days in BDT\n- `thisMonth`: Revenue from last 30 days in BDT\n- `allTime`: Total revenue in BDT (all time)\n\n## Note\nAll revenue values are in BDT (divide by 100 for currency display).\nDate ranges are calculated using UTC timezone."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Analytics endpoints for dashboard statistics and reporting.\n\n## Protected Endpoints (Auth Required)\n- Get Dashboard Statistics\n\n## Features\n- Comprehensive business metrics\n- Time-based revenue analysis\n- Product and promotion statistics\n- Order statistics with date ranges\n- All values in BDT (decimal precision)"
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Global pre-request script",
+                    "// This runs before every request",
+                    "",
+                    "// Check if base_url is set",
+                    "if (!pm.environment.get('base_url')) {",
+                    "    console.warn('⚠️ base_url environment variable is not set. Defaulting to http://localhost:5001');",
+                    "    pm.environment.set('base_url', 'http://localhost:5001');",
+                    "}"
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "exec": [
+                    "// Global test script",
+                    "// This runs after every request",
+                    "",
+                    "// Log response time",
+                    "console.log('Response time: ' + pm.response.responseTime + 'ms');",
+                    "",
+                    "// Check for common errors",
+                    "if (pm.response.code >= 500) {",
+                    "    console.error('❌ Server error:', pm.response.code);",
+                    "} else if (pm.response.code >= 400) {",
+                    "    console.warn('⚠️ Client error:', pm.response.code);",
+                    "}"
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:5001",
+            "type": "string"
+        },
+        {
+            "key": "product_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "promotion_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "order_id",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}
