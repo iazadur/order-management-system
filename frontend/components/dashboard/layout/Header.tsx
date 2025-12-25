@@ -61,18 +61,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
                         Logout
                     </Button>
 
-                    {/* Back to website */}
-                    <Link href="/">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="hidden sm:flex hover:bg-gray-50 transition-colors cursor-pointer duration-200 ease-linear"
-                        >
-                            <Home className="h-4 w-4 mr-2" />
-                            Back to Website
-                        </Button>
-                    </Link>
-
                     {/* Mobile back button */}
                     <Link href="/">
                         <Button
